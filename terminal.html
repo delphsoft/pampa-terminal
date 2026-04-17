@@ -40,52 +40,56 @@ body{background:var(--bg);color:var(--t1);font-family:'IBM Plex Mono',monospace;
 .ti .sym{color:var(--yl);font-weight:700}
 
 /* ── HEADER ── */
-#hdr{background:linear-gradient(90deg,#070712,#0d0d20);border-bottom:1px solid var(--bB);padding:6px 14px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.logo{display:flex;align-items:center;gap:10px}
-.logo-bar{width:3px;height:32px;background:var(--or)}
+#hdr{background:linear-gradient(90deg,#070712,#0d0d20);border-bottom:1px solid var(--bB);padding:0 16px;display:flex;align-items:stretch;justify-content:space-between;flex-shrink:0;min-height:54px}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-bar{width:3px;height:34px;background:linear-gradient(180deg,var(--or),var(--orD))}
 .logo-text{font-size:18px;font-weight:700;color:var(--or);letter-spacing:4px}
-.logo-sub{font-size:8px;color:var(--t3);letter-spacing:3px;margin-top:2px}
-.hdr-right{display:flex;align-items:center;gap:14px}
-#clk{font-size:14px;color:var(--cy);font-weight:600;letter-spacing:2px;font-variant-numeric:tabular-nums}
-#mst{padding:3px 10px;font-size:10px;font-weight:700;letter-spacing:2px}
-.mo{background:var(--grD);color:#fff}.mc{background:var(--rdD);color:#fff}
+.logo-sub{font-size:8px;color:var(--t3);letter-spacing:2.5px;margin-top:3px}
+.hdr-right{display:flex;align-items:stretch}
+.hdr-nav{display:flex;align-items:stretch}
+.hdr-nav-link{display:flex;align-items:center;gap:6px;padding:0 16px;font-size:10px;color:var(--t2);text-decoration:none;letter-spacing:1px;border-left:1px solid var(--b);transition:all .15s;white-space:nowrap}
+.hdr-nav-link:hover{color:var(--or);background:rgba(255,107,0,.06)}
+.hdr-nav-link .nav-icon{font-size:15px}
+#mst{padding:0 14px;font-size:10px;font-weight:700;letter-spacing:2px;display:flex;align-items:center;border-left:1px solid var(--b)}
+#clk{font-size:13px;color:var(--cy);font-weight:600;letter-spacing:2px;font-variant-numeric:tabular-nums;padding:0 16px;display:flex;align-items:center;border-left:1px solid var(--b);min-width:90px}
+.mo{background:rgba(0,200,83,.15);color:var(--gr)}.mc{background:rgba(255,23,68,.12);color:var(--rd)}
 
 /* ── MARKET BAR ── */
 #mbar{background:var(--bgp);border-bottom:1px solid var(--b);display:flex;overflow-x:auto;flex-shrink:0}
-.mb{padding:5px 16px;border-right:1px solid var(--b);min-width:115px;cursor:pointer;transition:background .15s;flex-shrink:0}
-.mb:hover{background:var(--bgph)}
-.mb:last-child{border-right:none}
-.mbl{font-size:8px;color:var(--t3);letter-spacing:1.5px;margin-bottom:2px;text-transform:uppercase}
-.mbv{font-size:13px;font-weight:700}
-.mbc{font-size:10px;margin-top:1px}
+#mbar::-webkit-scrollbar{display:none}
+.mb{padding:8px 18px;border-right:1px solid var(--b);min-width:118px;cursor:pointer;transition:background .15s;flex-shrink:0}
+.mb:hover{background:var(--bgph)}.mb:last-child{border-right:none}
+.mbl{font-size:8px;color:var(--t3);letter-spacing:1.5px;margin-bottom:3px;text-transform:uppercase}
+.mbv{font-size:14px;font-weight:700;letter-spacing:.5px}
+.mbc{font-size:10px;margin-top:2px}
 
 /* ── CONTROLS ── */
-#ctrl{background:var(--bg2);border-bottom:1px solid var(--b);padding:5px 14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;flex-shrink:0}
+#ctrl{background:var(--bg2);border-bottom:1px solid var(--b);padding:7px 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;flex-shrink:0}
 .cl{font-size:9px;color:var(--t3);letter-spacing:1.5px;text-transform:uppercase}
-select,button{background:var(--bgp);color:var(--t1);border:1px solid var(--bB);font-family:'IBM Plex Mono',monospace;font-size:11px;padding:4px 10px;cursor:pointer;outline:none;transition:border-color .15s}
-select:hover,button:hover{border-color:var(--or)}
-.bref{background:var(--orD);color:#fff;border-color:var(--or);font-weight:700;padding:4px 14px;letter-spacing:1px}
+select,button{background:var(--bgp);color:var(--t1);border:1px solid var(--bB);font-family:'IBM Plex Mono',monospace;font-size:11px;padding:5px 12px;cursor:pointer;outline:none;transition:all .15s}
+select:hover,button:hover{border-color:var(--or);color:var(--t1)}
+.bref{background:var(--orD);color:#fff;border-color:var(--or);font-weight:700;padding:5px 16px;letter-spacing:1px}
 .bref:hover{background:var(--or)}
-.sep{width:1px;height:22px;background:var(--bB);margin:0 4px;flex-shrink:0}
-#abadge{font-size:9px;padding:2px 6px;border:1px solid var(--gr);color:var(--gr);letter-spacing:1px}
-#cd{color:var(--t3);font-size:10px;min-width:26px}
+.sep{width:1px;height:24px;background:var(--bB);margin:0 4px;flex-shrink:0}
+#abadge{font-size:9px;padding:3px 8px;border:1px solid var(--gr);color:var(--gr);letter-spacing:1px}
+#cd{color:var(--t3);font-size:10px;min-width:28px}
 
-/* ── STATS ROW (clickable filters) ── */
-#srow{background:var(--bgp);border-bottom:1px solid var(--b);padding:0;display:flex;flex-shrink:0;overflow-x:auto}
-.sf{padding:6px 16px;display:flex;flex-direction:column;gap:2px;cursor:pointer;border-right:1px solid var(--b);transition:background .2s;flex-shrink:0;min-width:80px;position:relative}
-.sf:last-child{border-right:none}
-.sf:hover{background:var(--bgph)}
-.sf.active{background:var(--bgph)}
+/* ── STATS ROW ── */
+#srow{background:var(--bgp);border-bottom:1px solid var(--b);display:flex;flex-shrink:0;overflow-x:auto}
+#srow::-webkit-scrollbar{display:none}
+.sf{padding:10px 18px;display:flex;flex-direction:column;gap:3px;cursor:pointer;border-right:1px solid var(--b);transition:background .2s;flex-shrink:0;min-width:90px;position:relative}
+.sf:last-child{border-right:none}.sf:hover{background:var(--bgph)}.sf.active{background:var(--bgph)}
 .sf.active::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--or)}
-.sf-lbl{font-size:8px;color:var(--t3);letter-spacing:1px;text-transform:uppercase}
-.sf-val{font-size:16px;font-weight:700}
-.sf-sub{font-size:8px;color:var(--t3)}
+.sf-lbl{font-size:9px;color:var(--t3);letter-spacing:1px;text-transform:uppercase}
+.sf-val{font-size:20px;font-weight:700;line-height:1.1}
+.sf-sub{font-size:9px;color:var(--t3)}
 
-/* ── SCREENER TAB BAR ── */
-#tabbar{background:var(--bg2);border-bottom:1px solid var(--b);padding:0 14px;display:flex;gap:0;flex-shrink:0}
-.tab{padding:8px 16px;font-size:10px;font-weight:600;letter-spacing:1.5px;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;text-transform:uppercase}
-.tab:hover{color:var(--t1)}
-.tab.active{color:var(--or);border-bottom-color:var(--or)}
+/* ── TAB BAR ── */
+#tabbar{background:var(--bg2);border-bottom:2px solid var(--b);display:flex;flex-shrink:0;overflow-x:auto}
+#tabbar::-webkit-scrollbar{display:none}
+.tab{padding:13px 22px;font-size:12px;font-weight:600;letter-spacing:.5px;color:var(--t3);cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:7px;flex-shrink:0}
+.tab:hover{color:var(--t1);background:rgba(255,255,255,.03)}
+.tab.active{color:var(--or);border-bottom-color:var(--or);background:rgba(255,107,0,.04)}
 
 /* ── SCREENER PANEL ── */
 #screener-panel{background:var(--bg2);border-bottom:1px solid var(--b);padding:10px 14px;display:none;flex-wrap:wrap;gap:10px;flex-shrink:0}
@@ -215,10 +219,15 @@ td{padding:4px 8px;text-align:right;border-right:1px solid var(--b);white-space:
 <div id="hdr">
   <div class="logo">
     <div class="logo-bar"></div>
-    <div><div class="logo-text">▐ PAMPA TERMINAL</div><div class="logo-sub">PRO · STOCKS · CEDEARS · ANÁLISIS</div></div>
+    <div><div class="logo-text">▐ PAMPA TERMINAL</div><div class="logo-sub">STOCKS · CEDEARS · RENTA FIJA · IA</div></div>
   </div>
   <div class="hdr-right">
-    <div id="mst" class="mc">MERCADO CERRADO</div>
+    <nav class="hdr-nav">
+      <a href="/on.html"        class="hdr-nav-link"><span class="nav-icon">📋</span>ON</a>
+      <a href="/portfolio.html" class="hdr-nav-link"><span class="nav-icon">💼</span>Portfolio</a>
+      <a href="/agent.html"     class="hdr-nav-link"><span class="nav-icon">🧠</span>Agente IA</a>
+    </nav>
+    <div id="mst" class="mc">CERRADO</div>
     <div id="clk">--:--:--</div>
   </div>
 </div>
