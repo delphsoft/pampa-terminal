@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Renta Fija — Pampa Terminal</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07070f;--bg2:#0d0d1a;--bgp:#111120;--bgph:#161628;
+  --b:#1c1c32;--bB:#282845;
+  --or:#ff6b00;--orD:#cc5500;
+  --gr:#00c853;--grD:#00962e;
+  --rd:#ff1744;--rdD:#c0001a;
+  --yl:#ffd600;--cy:#00e5ff;
+  --t1:#e8e8f8;--t2:#9090b8;--t3:#444466;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--t1);font-family:'IBM Plex Mono',monospace;font-size:12px;min-height:100vh}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bB)}
+.up{color:var(--gr)!important}.dn{color:var(--rd)!important}
+
+#hdr{background:linear-gradient(90deg,#000,#050510);border-bottom:2px solid var(--or);padding:6px 16px;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-bar{width:3px;height:28px;background:var(--or)}
+.logo-t{font-size:15px;font-weight:700;color:var(--or);letter-spacing:4px}
+.logo-s{font-size:8px;color:var(--t3);letter-spacing:2px;margin-top:1px}
+.nav-links{display:flex;gap:0}
+.nav-link{padding:6px 14px;font-size:10px;color:var(--t2);text-decoration:none;letter-spacing:1px;border-right:1px solid var(--b);transition:all .15s}
+.nav-link:hover,.nav-link.active{color:var(--or);background:var(--bgp)}
+
+/* MARKET STRIP */
+#mstrip{background:var(--bgp);border-bottom:1px solid var(--b);padding:6px 16px;display:flex;gap:24px;font-size:10px;flex-wrap:wrap}
+.ms-item{display:flex;flex-direction:column;gap:1px}
+.ms-lbl{font-size:8px;color:var(--t3);letter-spacing:1px;text-transform:uppercase}
+.ms-val{font-weight:700;font-size:12px}
+
+/* TAB BAR */
+#tabbar{background:var(--bg2);border-bottom:1px solid var(--b);padding:0 16px;display:flex}
+.tab{padding:8px 18px;font-size:10px;font-weight:600;letter-spacing:1.5px;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;text-transform:uppercase}
+.tab:hover{color:var(--t1)}.tab.active{color:var(--or);border-bottom-color:var(--or)}
+
+/* CONTROLS */
+#ctrl{background:var(--bg2);border-bottom:1px solid var(--b);padding:6px 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.cl{font-size:9px;color:var(--t3);letter-spacing:1.5px;text-transform:uppercase}
+.hm-btn{font-size:9px;padding:3px 10px;border:1px solid var(--bB);background:var(--bgp);color:var(--t2);cursor:pointer;font-family:'IBM Plex Mono',monospace;letter-spacing:.5px;transition:all .15s}
+.hm-btn:hover{border-color:var(--or);color:var(--t1)}.hm-btn.active{border-color:var(--or);color:var(--or);background:#1a0a00}
+.sep{width:1px;height:22px;background:var(--bB)}
+
+/* TABLES */
+.rf-table{width:100%;border-collapse:collapse;font-size:11px}
+.rf-table thead tr{background:#000;border-bottom:1px solid var(--or);position:sticky;top:0;z-index:10}
+.rf-table th{padding:6px 10px;text-align:right;color:var(--t2);font-size:9px;letter-spacing:1px;border-right:1px solid var(--b);white-space:nowrap;cursor:pointer;user-select:none;text-transform:uppercase}
+.rf-table th:hover{color:var(--or)}.rf-table th.tl{text-align:left}.rf-table th.ta{color:var(--or)}
+.rf-table tbody tr{border-bottom:1px solid var(--b);cursor:pointer;transition:background .12s}
+.rf-table tbody tr:nth-child(even){background:#0a0a16}
+.rf-table tbody tr:nth-child(odd){background:#0c0c1a}
+.rf-table tbody tr:hover{background:#181830}
+.rf-table td{padding:6px 10px;text-align:right;border-right:1px solid var(--b);white-space:nowrap}
+.rf-table td.tl{text-align:left}
+
+/* BADGES */
+.bdg{display:inline-block;padding:1px 6px;font-size:8px;font-weight:700}
+.b-usd{background:#001a2a;color:#00e5ff;border:1px solid #005580}
+.b-dl{background:#1a1400;color:#ffd600;border:1px solid #554400}
+.b-cer{background:#1a001a;color:#cc88ff;border:1px solid #550055}
+.b-ars{background:#1a0a00;color:#ff8844;border:1px solid #553300}
+.b-ny{background:#002010;color:#00c853;border:1px solid #00962e}
+.b-arg{background:#101020;color:#8888aa;border:1px solid #282845}
+
+/* DETAIL PANEL */
+#detail-panel{display:none;position:fixed;right:0;top:0;bottom:0;width:420px;background:var(--bg2);border-left:1px solid var(--or);z-index:200;overflow-y:auto;padding:20px}
+#detail-panel.open{display:block}
+.dp-close{position:absolute;top:12px;right:14px;background:none;border:1px solid var(--bB);color:var(--t2);font-size:14px;padding:2px 8px;cursor:pointer;font-family:'IBM Plex Mono',monospace}
+.dp-close:hover{border-color:var(--rd);color:var(--rd)}
+.dp-ticker{font-size:20px;font-weight:700;color:var(--yl);letter-spacing:2px;margin-bottom:4px}
+.dp-name{font-size:11px;color:var(--t2);margin-bottom:16px}
+.dp-section{font-size:9px;color:var(--or);letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid var(--b);padding-bottom:4px;margin:14px 0 10px}
+.dp-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--b);margin-bottom:8px}
+.dp-kv{background:var(--bgp);padding:9px 12px}
+.dp-lbl{font-size:8px;color:var(--t3);letter-spacing:1px;margin-bottom:3px;text-transform:uppercase}
+.dp-val{font-size:13px;font-weight:700}
+
+/* YIELD CURVE */
+.curve-container{position:relative;height:140px;margin:8px 0}
+
+/* INFO BOX */
+.info-box{background:var(--bgp);border:1px solid var(--b);padding:12px 14px;font-size:10px;color:var(--t2);line-height:1.8;margin-top:8px}
+.info-box b{color:var(--t1)}
+
+#content{padding:0 0 60px}
+.panel{display:none}.panel.active{display:block}
+
+.disclaimer{padding:8px 16px;font-size:9px;color:var(--t3);background:var(--bgp);border-top:1px solid var(--b)}
+</style>
+</head>
+<body>
+
+<div id="hdr">
+  <div class="logo">
+    <div class="logo-bar"></div>
+    <div><div class="logo-t">PAMPA TERMINAL</div><div class="logo-s">RENTA FIJA · ON · BONOS</div></div>
+  </div>
+  <div class="nav-links">
+    <a href="/terminal.html" class="nav-link">📊 Terminal</a>
+    <a href="/on.html" class="nav-link active">📋 ON</a>
+    <a href="/agent.html" class="nav-link">🧠 Agente IA</a>
+    <a href="/portfolio.html" class="nav-link">💼 Portfolio</a>
+  </div>
+</div>
+
+<!-- MARKET STRIP -->
+<div id="mstrip">
+  <div class="ms-item"><div class="ms-lbl">USD Blue</div><div class="ms-val" id="ms-blue">—</div></div>
+  <div class="ms-item"><div class="ms-lbl">USD CCL</div><div class="ms-val" id="ms-ccl">—</div></div>
+  <div class="ms-item"><div class="ms-lbl">USD MEP</div><div class="ms-val" id="ms-mep">—</div></div>
+  <div class="ms-item"><div class="ms-lbl">Brecha Blue/Oficial</div><div class="ms-val" id="ms-brecha">—</div></div>
+  <div class="ms-item"><div class="ms-lbl">Oro</div><div class="ms-val" id="ms-gold">—</div></div>
+  <div class="ms-item"><div class="ms-lbl">Riesgo País (est.)</div><div class="ms-val" id="ms-rp">—</div></div>
+</div>
+
+<!-- TABS -->
+<div id="tabbar">
+  <div class="tab active" onclick="setTab('on')">📋 ON Corporativas</div>
+  <div class="tab" onclick="setTab('bonos')">🏛 Bonos Soberanos</div>
+  <div class="tab" onclick="setTab('curva')">📈 Curva de Rendimientos</div>
+  <div class="tab" onclick="setTab('info')">ℹ️ Guía del Inversor</div>
+</div>
+
+<!-- ON CONTROLS -->
+<div id="ctrl">
+  <span class="cl">Moneda:</span>
+  <button class="hm-btn active" id="f-all"  onclick="setFilter('all')">TODAS</button>
+  <button class="hm-btn"        id="f-usd"  onclick="setFilter('usd')">HARD USD</button>
+  <button class="hm-btn"        id="f-peso" onclick="setFilter('peso')">PESOS</button>
+  <div class="sep"></div>
+  <span class="cl">Ordenar:</span>
+  <button class="hm-btn active" id="s-tir"  onclick="setSort('tir')">TIR</button>
+  <button class="hm-btn"        id="s-dur"  onclick="setSort('dur')">DURACIÓN</button>
+  <button class="hm-btn"        id="s-vcto" onclick="setSort('vcto')">VENCIM.</button>
+  <button class="hm-btn"        id="s-precio" onclick="setSort('precio')">PRECIO</button>
+  <div class="sep"></div>
+  <span style="font-size:9px;color:var(--t3)">Datos de referencia · No vinculantes</span>
+</div>
+
+<!-- CONTENT -->
+<div id="content">
+
+<!-- ON PANEL -->
+<div class="panel active" id="panel-on">
+  <div style="overflow-x:auto">
+  <table class="rf-table">
+    <thead><tr>
+      <th class="tl" onclick="setSort('ticker')">TICKER <span id="sa-ticker"></span></th>
+      <th class="tl">EMISOR</th>
+      <th>MON.</th>
+      <th onclick="setSort('precio')">PRECIO <span id="sa-precio"></span></th>
+      <th onclick="setSort('tir')">TIR% <span id="sa-tir">▲</span></th>
+      <th>CUPÓN%</th>
+      <th onclick="setSort('dur')">DUR. <span id="sa-dur"></span></th>
+      <th onclick="setSort('vcto')">VENCIM. <span id="sa-vcto"></span></th>
+      <th>LEY</th>
+      <th>CALIF.</th>
+      <th>SPREAD vs SOB.</th>
+      <th>PARIDAD%</th>
+    </tr></thead>
+    <tbody id="on-tbody"></tbody>
+  </table>
+  </div>
+</div>
+
+<!-- BONOS PANEL -->
+<div class="panel" id="panel-bonos">
+  <div style="overflow-x:auto">
+  <table class="rf-table">
+    <thead><tr>
+      <th class="tl">TICKER</th>
+      <th class="tl">DESCRIPCIÓN</th>
+      <th>PRECIO USD</th>
+      <th>TIR%</th>
+      <th>PARIDAD%</th>
+      <th>DUR. MOD.</th>
+      <th>VENCIM.</th>
+      <th>LEY</th>
+      <th>PRÓX. CUPÓN</th>
+      <th>STRIPPED</th>
+    </tr></thead>
+    <tbody id="bonos-tbody"></tbody>
+  </table>
+  </div>
+</div>
+
+<!-- CURVA PANEL -->
+<div class="panel" id="panel-curva" style="padding:20px">
+  <div style="margin-bottom:20px">
+    <div style="font-size:9px;color:var(--or);letter-spacing:2px;margin-bottom:12px">◆ CURVA DE RENDIMIENTOS — BONOS SOBERANOS ARG (USD)</div>
+    <div id="curva-svg-wrap"></div>
+    <div style="font-size:9px;color:var(--t3);margin-top:8px">Curva estimada. Datos de referencia.</div>
+  </div>
+  <div>
+    <div style="font-size:9px;color:var(--or);letter-spacing:2px;margin-bottom:12px">◆ CURVA ONs CORPORATIVAS — HARD USD</div>
+    <div id="curva-on-wrap"></div>
+  </div>
+</div>
+
+<!-- INFO PANEL -->
+<div class="panel" id="panel-info" style="padding:20px;max-width:800px">
+  <div style="font-size:9px;color:var(--or);letter-spacing:2px;margin-bottom:16px">◆ GUÍA DEL INVERSOR EN RENTA FIJA ARGENTINA</div>
+  <div style="display:grid;gap:14px">
+    <div class="info-box">
+      <b>¿Qué son las ONs (Obligaciones Negociables)?</b><br>
+      Son bonos emitidos por empresas privadas para financiarse. El inversor le presta dinero a la empresa a cambio de cobrar intereses (cupón) y recuperar el capital al vencimiento. En Argentina son una de las mejores alternativas para dolarizarse dentro del sistema financiero local.
+    </div>
+    <div class="info-box">
+      <b>Tipos de ONs en Argentina</b><br>
+      <b>Hard Dollar:</b> pagan y amortizan en USD (el "dólar cable" real). Son las más demandadas.<br>
+      <b>Dollar Linked:</b> en pesos pero ajustan por el tipo de cambio oficial. Cobertura contra devaluación.<br>
+      <b>CER:</b> ajustan por inflación (índice CER). Para protegerse de la inflación en pesos.<br>
+      <b>Tasa Fija en ARS:</b> pagan una tasa fija en pesos. Mayor riesgo si sube la inflación.
+    </div>
+    <div class="info-box">
+      <b>TIR (Tasa Interna de Retorno)</b><br>
+      Es el rendimiento anual que obtenés si comprás hoy al precio actual y mantenés hasta el vencimiento. Incluye los cupones reinvertidos. Una TIR más alta implica mayor riesgo (o mayor oportunidad). Siempre comparar TIR de ONs vs bonos soberanos del mismo plazo.
+    </div>
+    <div class="info-box">
+      <b>Duración Modificada</b><br>
+      Mide la sensibilidad del precio ante cambios en la TIR. Duración de 3 años significa que si la TIR sube 1%, el precio cae ~3%. A menor duración, menor riesgo de tasa de interés. Para inversores conservadores, preferir duraciones cortas (&lt;2 años).
+    </div>
+    <div class="info-box">
+      <b>Ley de Emisión</b><br>
+      <b>Ley NY (Nueva York):</b> contratos bajo jurisdicción estadounidense. Mayor protección legal para el inversor. Históricamente resisten mejor los defaults y reestructuraciones argentinas.<br>
+      <b>Ley ARG:</b> jurisdicción local. Más vulnerable a cambios regulatorios, pero suelen tener TIR más alta por ese riesgo adicional.
+    </div>
+    <div class="info-box">
+      <b>Paridad</b><br>
+      Es el precio del bono expresado como % del valor nominal (VN = 100). Si un bono cotiza a 68, su paridad es 68%. Los bonos soberanos argentinos suelen cotizar con alta paridad (descuento significativo sobre el VN) por el riesgo crediticio del país.
+    </div>
+    <div class="info-box">
+      <b>Spread vs Soberano</b><br>
+      Diferencia entre la TIR de la ON y la TIR de un bono soberano del mismo plazo. Un spread alto indica que el mercado percibe mayor riesgo en la empresa que en el Estado. Para ONs de alta calidad (BB, B+), el spread suele ser 100-300 bps sobre el soberano.
+    </div>
+    <div class="info-box" style="border-color:#332200">
+      <b>⚠ Riesgos a considerar</b><br>
+      Riesgo de crédito (default del emisor) · Riesgo de liquidez (dificultad para vender antes del vencimiento) · Riesgo de tasa (sube la TIR y cae el precio) · Riesgo cambiario (en ONs en pesos) · Riesgo regulatorio (cepo, restricciones CNV).
+    </div>
+  </div>
+</div>
+
+</div><!-- end content -->
+
+<div class="disclaimer">⚠ Precios y TIR son estimaciones de referencia. Consultá tu broker o Agente de Liquidación y Compensación (ALyC) habilitado por CNV para cotizaciones y operaciones reales.</div>
+
+<!-- DETAIL PANEL -->
+<div id="detail-panel">
+  <button class="dp-close" onclick="closeDetail()">✕</button>
+  <div id="detail-content"></div>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────
+const ON_DATA = [
+  // Hard USD ley NY
+  {ticker:'YCA6O', emisor:'YPF',          sector:'Energía',     mon:'USD',cupon:8.50,tir:8.20,precio:101.2,dur:2.8,vcto:'2026-07-26',ley:'NY', calif:'B',  spread:180,paridad:101.2,prospe:'https://www.cnv.gov.ar'},
+  {ticker:'YMCXO', emisor:'YPF',          sector:'Energía',     mon:'USD',cupon:9.00,tir:9.40,precio:97.8, dur:4.1,vcto:'2029-01-15',ley:'NY', calif:'B',  spread:220,paridad:97.8, prospe:'#'},
+  {ticker:'PNDCO', emisor:'Pampa Energía',sector:'Energía',     mon:'USD',cupon:9.50,tir:9.20,precio:101.8,dur:3.5,vcto:'2031-07-15',ley:'NY', calif:'B',  spread:200,paridad:101.8,prospe:'#'},
+  {ticker:'TACFO', emisor:'Telecom Arg.', sector:'Telecom',     mon:'USD',cupon:8.00,tir:8.60,precio:98.9, dur:3.2,vcto:'2030-08-14',ley:'NY', calif:'B',  spread:140,paridad:98.9, prospe:'#'},
+  {ticker:'MRPHO', emisor:'MercadoLibre', sector:'E-commerce',  mon:'USD',cupon:7.50,tir:7.20,precio:102.4,dur:5.1,vcto:'2031-12-01',ley:'NY', calif:'BB', spread:80, paridad:102.4,prospe:'#'},
+  {ticker:'GCFSO', emisor:'Galicia',      sector:'Financiero',  mon:'USD',cupon:8.25,tir:8.70,precio:98.3, dur:2.6,vcto:'2027-09-10',ley:'NY', calif:'B',  spread:150,paridad:98.3, prospe:'#'},
+  {ticker:'BMAPO', emisor:'Banco Macro',  sector:'Financiero',  mon:'USD',cupon:8.50,tir:8.90,precio:98.7, dur:3.0,vcto:'2030-06-20',ley:'NY', calif:'B',  spread:170,paridad:98.7, prospe:'#'},
+  {ticker:'VLGUO', emisor:'Vista Energy', sector:'Energía',     mon:'USD',cupon:9.00,tir:9.30,precio:98.1, dur:4.4,vcto:'2028-12-15',ley:'NY', calif:'B+', spread:210,paridad:98.1, prospe:'#'},
+  {ticker:'TGSUO', emisor:'TGS',          sector:'Gas',         mon:'USD',cupon:8.25,tir:8.50,precio:99.5, dur:3.8,vcto:'2031-05-02',ley:'NY', calif:'B+', spread:130,paridad:99.5, prospe:'#'},
+  {ticker:'MGCHO', emisor:'Mastellone',   sector:'Alimentos',   mon:'USD',cupon:9.75,tir:10.1,precio:97.0, dur:1.5,vcto:'2026-04-01',ley:'NY', calif:'CCC+',spread:290,paridad:97.0,prospe:'#'},
+  {ticker:'IRCFO', emisor:'IRSA',         sector:'Real Estate', mon:'USD',cupon:8.75,tir:9.10,precio:98.5, dur:2.2,vcto:'2028-03-22',ley:'NY', calif:'B-', spread:190,paridad:98.5, prospe:'#'},
+  {ticker:'CRCCO', emisor:'Cresud',       sector:'Agro',        mon:'USD',cupon:8.00,tir:8.80,precio:97.2, dur:1.8,vcto:'2026-11-30',ley:'NY', calif:'B-', spread:160,paridad:97.2, prospe:'#'},
+  // Hard USD ley ARG
+  {ticker:'YCA6D', emisor:'YPF',          sector:'Energía',     mon:'USD',cupon:8.50,tir:8.80,precio:99.5, dur:2.8,vcto:'2026-07-26',ley:'ARG',calif:'B',  spread:260,paridad:99.5, prospe:'#'},
+  {ticker:'TACFD', emisor:'Telecom Arg.', sector:'Telecom',     mon:'USD',cupon:8.00,tir:8.90,precio:98.2, dur:3.2,vcto:'2030-08-14',ley:'ARG',calif:'B',  spread:170,paridad:98.2, prospe:'#'},
+  {ticker:'PNDCD', emisor:'Pampa Energía',sector:'Energía',     mon:'USD',cupon:9.50,tir:9.50,precio:100.8,dur:3.5,vcto:'2031-07-15',ley:'ARG',calif:'B',  spread:230,paridad:100.8,prospe:'#'},
+  // Dollar Linked
+  {ticker:'YCANO', emisor:'YPF',          sector:'Energía',     mon:'DL', cupon:0.00,tir:-1.2,precio:101.4,dur:0.8,vcto:'2025-09-30',ley:'ARG',calif:'B',  spread:0,  paridad:101.4,prospe:'#'},
+  {ticker:'PMYDO', emisor:'Pampa Energía',sector:'Energía',     mon:'DL', cupon:0.00,tir:-0.8,precio:100.9,dur:1.1,vcto:'2026-03-15',ley:'ARG',calif:'B',  spread:0,  paridad:100.9,prospe:'#'},
+  {ticker:'TRADO', emisor:'Transportadora',sector:'Gas',        mon:'DL', cupon:1.00,tir:-0.5,precio:101.2,dur:1.4,vcto:'2026-06-20',ley:'ARG',calif:'B+', spread:0,  paridad:101.2,prospe:'#'},
+  // CER
+  {ticker:'IRCEC', emisor:'IRSA',         sector:'Real Estate', mon:'CER',cupon:4.00,tir:7.20,precio:102.1,dur:1.2,vcto:'2026-01-22',ley:'ARG',calif:'B-', spread:0,  paridad:102.1,prospe:'#'},
+  {ticker:'GALIC', emisor:'Galicia',      sector:'Financiero',  mon:'CER',cupon:3.50,tir:6.80,precio:101.5,dur:2.1,vcto:'2027-04-10',ley:'ARG',calif:'B',  spread:0,  paridad:101.5,prospe:'#'},
+  // Tasa fija ARS
+  {ticker:'COIPC', emisor:'Coinag',       sector:'Fintech',     mon:'ARS',cupon:55.0,tir:52.4,precio:101.8,dur:0.6,vcto:'2025-08-15',ley:'ARG',calif:'B-', spread:0,  paridad:101.8,prospe:'#'},
+  {ticker:'MRCPC', emisor:'Mercado Cred.',sector:'Fintech',     mon:'ARS',cupon:62.0,tir:59.8,precio:102.4,dur:0.9,vcto:'2025-11-30',ley:'ARG',calif:'B+', spread:0,  paridad:102.4,prospe:'#'},
+];
+
+const BONOS_DATA = [
+  {ticker:'GD30', desc:'Global 2030 Ley NY',    precio:68.50,tir:12.8,paridad:68.5, dur:3.8,vcto:'2030-07-09',ley:'NY', proxCupon:'2025-07-09',stripped:62.1},
+  {ticker:'GD35', desc:'Global 2035 Ley NY',    precio:62.10,tir:13.4,paridad:62.1, dur:5.2,vcto:'2035-07-09',ley:'NY', proxCupon:'2025-07-09',stripped:58.4},
+  {ticker:'GD38', desc:'Global 2038 Ley NY',    precio:58.40,tir:13.8,paridad:58.4, dur:6.8,vcto:'2038-01-09',ley:'NY', proxCupon:'2025-07-09',stripped:55.2},
+  {ticker:'GD41', desc:'Global 2041 Ley NY',    precio:56.20,tir:14.1,paridad:56.2, dur:7.9,vcto:'2041-07-09',ley:'NY', proxCupon:'2025-07-09',stripped:53.8},
+  {ticker:'GD46', desc:'Global 2046 Ley NY',    precio:54.80,tir:14.3,paridad:54.8, dur:9.2,vcto:'2046-07-09',ley:'NY', proxCupon:'2025-07-09',stripped:52.1},
+  {ticker:'AL30', desc:'Bono 2030 Ley ARG',     precio:61.20,tir:14.2,paridad:61.2, dur:3.8,vcto:'2030-07-09',ley:'ARG',proxCupon:'2025-07-09',stripped:55.8},
+  {ticker:'AL35', desc:'Bono 2035 Ley ARG',     precio:55.80,tir:14.8,paridad:55.8, dur:5.2,vcto:'2035-07-09',ley:'ARG',proxCupon:'2025-07-09',stripped:52.4},
+  {ticker:'AE38', desc:'Bono 2038 Ley ARG',     precio:52.10,tir:15.1,paridad:52.1, dur:6.8,vcto:'2038-01-09',ley:'ARG',proxCupon:'2025-07-09',stripped:49.8},
+  {ticker:'AL41', desc:'Bono 2041 Ley ARG',     precio:50.80,tir:15.3,paridad:50.8, dur:7.9,vcto:'2041-07-09',ley:'ARG',proxCupon:'2025-07-09',stripped:48.2},
+  {ticker:'AL29', desc:'Bono 2029 Ley ARG',     precio:72.40,tir:12.1,paridad:72.4, dur:2.8,vcto:'2029-07-09',ley:'ARG',proxCupon:'2025-07-09',stripped:68.2},
+];
+
+let currentTab = 'on';
+let currentFilter = 'all';
+let currentSort = 'tir';
+let sortDir = 1;
+let selectedItem = null;
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+async function init() {
+  await loadMarketData();
+  renderON();
+  renderBonos();
+  renderCurva();
+}
+
+async function loadMarketData() {
+  try {
+    const r = await fetch('/api/dolar');
+    if (r.ok) {
+      const d = await r.json();
+      if (d.blue)  document.getElementById('ms-blue').textContent = '$' + d.blue.venta.toLocaleString('es-AR');
+      if (d.ccl)   document.getElementById('ms-ccl').textContent  = '$' + d.ccl.venta.toLocaleString('es-AR');
+      if (d.mep)   document.getElementById('ms-mep').textContent  = '$' + d.mep.venta.toLocaleString('es-AR');
+      if (d.brecha) {
+        const bEl = document.getElementById('ms-brecha');
+        bEl.textContent = d.brecha + '%';
+        bEl.className = 'ms-val ' + (parseFloat(d.brecha) > 0 ? 'up' : 'dn');
+      }
+    }
+    const mr = await fetch('/api/market');
+    if (mr.ok) {
+      const md = await mr.json();
+      if (md.market?.gold) document.getElementById('ms-gold').textContent = '$' + md.market.gold.value.toFixed(2);
+      // Riesgo país estimado basado en spread soberano
+      const rp = Math.round(BONOS_DATA[0].tir * 100 * (1 + Math.random() * 0.02));
+      const rpEl = document.getElementById('ms-rp');
+      rpEl.textContent = rp + ' bps';
+      rpEl.className = 'ms-val ' + (rp < 800 ? 'up' : 'dn');
+    }
+  } catch {}
+}
+
+// ── TABS ──────────────────────────────────────────────────────────────────
+function setTab(t) {
+  currentTab = t;
+  document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+  document.querySelector(`.tab[onclick="setTab('${t}')"]`).classList.add('active');
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + t).classList.add('active');
+}
+
+function setFilter(f) {
+  currentFilter = f;
+  ['f-all','f-usd','f-peso'].forEach(id => document.getElementById(id)?.classList.remove('active'));
+  document.getElementById('f-' + f)?.classList.add('active');
+  renderON();
+}
+
+function setSort(s) {
+  if (currentSort === s) sortDir *= -1; else { currentSort = s; sortDir = 1; }
+  ['s-tir','s-dur','s-vcto','s-precio','sa-ticker','sa-precio','sa-tir','sa-dur','sa-vcto'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.textContent = '';
+  });
+  const arrowEl = document.getElementById('sa-' + s) || document.getElementById('s-' + s);
+  if (arrowEl) arrowEl.textContent = sortDir > 0 ? '▲' : '▼';
+  renderON();
+}
+
+// ── RENDER ON ─────────────────────────────────────────────────────────────
+function renderON() {
+  let data = [...ON_DATA];
+  if (currentFilter === 'usd')  data = data.filter(o => o.mon === 'USD');
+  if (currentFilter === 'peso') data = data.filter(o => o.mon !== 'USD');
+
+  data.sort((a, b) => {
+    if (currentSort === 'tir')    return sortDir * (a.tir - b.tir);
+    if (currentSort === 'dur')    return sortDir * (a.dur - b.dur);
+    if (currentSort === 'vcto')   return sortDir * (new Date(a.vcto) - new Date(b.vcto));
+    if (currentSort === 'precio') return sortDir * (a.precio - b.precio);
+    return sortDir * a.ticker.localeCompare(b.ticker);
+  });
+
+  document.getElementById('on-tbody').innerHTML = data.map((o, i) => {
+    const bg = i % 2 === 0 ? '#0a0a16' : '#0c0c1a';
+    const monBadge = {
+      USD: '<span class="bdg b-usd">USD</span>',
+      DL:  '<span class="bdg b-dl">DL</span>',
+      CER: '<span class="bdg b-cer">CER</span>',
+      ARS: '<span class="bdg b-ars">ARS</span>',
+    }[o.mon] || o.mon;
+    const leyBadge = o.ley === 'NY'
+      ? '<span class="bdg b-ny">NY</span>'
+      : '<span class="bdg b-arg">ARG</span>';
+    const califColor = o.calif.startsWith('BB') ? 'var(--gr)' : o.calif.startsWith('B+') ? 'var(--cy)' : o.calif.startsWith('B') ? 'var(--yl)' : 'var(--rd)';
+    const tirColor = o.tir > 10 ? 'var(--gr)' : o.tir > 7 ? 'var(--cy)' : o.tir > 0 ? 'var(--t1)' : 'var(--rd)';
+    const days = Math.floor((new Date(o.vcto) - Date.now()) / 86400000);
+    const vctoStr = new Date(o.vcto).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: '2-digit' });
+    const vctoColor = days < 180 ? 'var(--or)' : days < 365 ? 'var(--yl)' : 'var(--t2)';
+    const spreadStr = o.mon === 'USD' ? `+${o.spread} bps` : '—';
+    const pNoise = (Math.random() - 0.5) * 0.3;
+    const pShow = (o.precio + pNoise).toFixed(2);
+
+    return `<tr style="background:${bg}" onclick="openDetail('on','${o.ticker}')" onmouseover="this.style.background='#181830'" onmouseout="this.style.background='${bg}'">
+      <td class="tl" style="font-weight:700;color:var(--yl)">${o.ticker}</td>
+      <td class="tl" style="color:var(--t1)">${o.emisor}</td>
+      <td style="text-align:center">${monBadge}</td>
+      <td style="font-weight:600">${pShow}</td>
+      <td style="font-weight:700;color:${tirColor}">${o.tir >= 0 ? '+' : ''}${o.tir.toFixed(2)}%</td>
+      <td style="color:var(--t2)">${o.cupon.toFixed(2)}%</td>
+      <td style="color:var(--t2)">${o.dur.toFixed(1)}a</td>
+      <td style="color:${vctoColor};font-size:10px">${vctoStr}<div style="font-size:8px;color:var(--t3)">${days}d</div></td>
+      <td style="text-align:center">${leyBadge}</td>
+      <td style="font-weight:700;color:${califColor}">${o.calif}</td>
+      <td style="color:var(--t2);font-size:10px">${spreadStr}</td>
+      <td style="color:var(--t2)">${o.paridad.toFixed(1)}%</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── RENDER BONOS ──────────────────────────────────────────────────────────
+function renderBonos() {
+  document.getElementById('bonos-tbody').innerHTML = BONOS_DATA.map((b, i) => {
+    const bg = i % 2 === 0 ? '#0a0a16' : '#0c0c1a';
+    const leyBadge = b.ley === 'NY' ? '<span class="bdg b-ny">NY</span>' : '<span class="bdg b-arg">ARG</span>';
+    const tirColor = b.tir > 15 ? 'var(--or)' : b.tir > 12 ? 'var(--yl)' : 'var(--cy)';
+    const days = Math.floor((new Date(b.vcto) - Date.now()) / 86400000);
+    const proxDate = new Date(b.proxCupon).toLocaleDateString('es-AR', { day: '2-digit', month: 'short' });
+    const pNoise = (Math.random() - 0.5) * 0.4;
+    const pShow = (b.precio + pNoise).toFixed(2);
+    return `<tr style="background:${bg}" onclick="openDetail('bono','${b.ticker}')" onmouseover="this.style.background='#181830'" onmouseout="this.style.background='${bg}'">
+      <td class="tl" style="font-weight:700;color:var(--yl)">${b.ticker}</td>
+      <td class="tl" style="color:var(--t1);font-size:10px">${b.desc}</td>
+      <td style="font-weight:700">${pShow}</td>
+      <td style="font-weight:700;color:${tirColor}">${b.tir.toFixed(2)}%</td>
+      <td style="color:var(--t2)">${b.paridad.toFixed(1)}%</td>
+      <td style="color:var(--t2)">${b.dur.toFixed(1)}a</td>
+      <td style="color:var(--t2);font-size:10px">${new Date(b.vcto).toLocaleDateString('es-AR',{day:'2-digit',month:'short',year:'2-digit'})}</td>
+      <td style="text-align:center">${leyBadge}</td>
+      <td style="color:var(--cy)">${proxDate}</td>
+      <td style="color:var(--t2)">${b.stripped.toFixed(2)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── RENDER CURVA ──────────────────────────────────────────────────────────
+function renderCurva() {
+  renderCurvaChart('curva-svg-wrap', BONOS_DATA.map(b => ({ label: b.ticker, dur: b.dur, tir: b.tir, color: b.ley === 'NY' ? '#00c853' : '#ffd600' })), 'Bonos Soberanos ARG');
+  const onUSD = ON_DATA.filter(o => o.mon === 'USD');
+  renderCurvaChart('curva-on-wrap', onUSD.map(o => ({ label: o.ticker, dur: o.dur, tir: o.tir, color: '#00e5ff' })), 'ONs Hard Dollar');
+}
+
+function renderCurvaChart(containerId, points, title) {
+  const W = Math.min(800, window.innerWidth - 40);
+  const H = 180;
+  const pad = { l: 50, r: 20, t: 20, b: 40 };
+  const cW = W - pad.l - pad.r, cH = H - pad.t - pad.b;
+
+  if (!points.length) return;
+  const maxDur = Math.max(...points.map(p => p.dur)) * 1.1;
+  const maxTir = Math.max(...points.map(p => p.tir)) * 1.1;
+  const minTir = Math.min(...points.map(p => p.tir)) * 0.9;
+  const tirRange = maxTir - minTir || 1;
+
+  const px = d => pad.l + (d / maxDur) * cW;
+  const py = t => pad.t + cH - ((t - minTir) / tirRange) * cH;
+
+  // Sort by duration for line
+  const sorted = [...points].sort((a, b) => a.dur - b.dur);
+
+  let svg = `<svg width="${W}" height="${H}" style="display:block;margin-bottom:16px">`;
+
+  // Grid
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.t + (cH / 4) * i;
+    const v = maxTir - (tirRange / 4) * i;
+    svg += `<line x1="${pad.l}" y1="${y}" x2="${W - pad.r}" y2="${y}" stroke="#1c1c32" stroke-width="0.5"/>`;
+    svg += `<text x="${pad.l - 5}" y="${y + 4}" text-anchor="end" font-size="9" fill="#444466" font-family="IBM Plex Mono">${v.toFixed(1)}%</text>`;
+  }
+  for (let d = 0; d <= Math.ceil(maxDur); d += 1) {
+    const x = px(d);
+    svg += `<text x="${x}" y="${H - 6}" text-anchor="middle" font-size="9" fill="#444466" font-family="IBM Plex Mono">${d}a</text>`;
+  }
+
+  // Trend line
+  const linePts = sorted.map(p => `${px(p.dur)},${py(p.tir)}`).join(' ');
+  svg += `<polyline points="${linePts}" fill="none" stroke="${sorted[0]?.color || '#00c853'}" stroke-width="1.5" stroke-dasharray="4,2" opacity="0.6"/>`;
+
+  // Points
+  points.forEach(p => {
+    svg += `<circle cx="${px(p.dur)}" cy="${py(p.tir)}" r="5" fill="${p.color}" opacity="0.9"/>`;
+    svg += `<text x="${px(p.dur)}" y="${py(p.tir) - 8}" text-anchor="middle" font-size="8" fill="${p.color}" font-family="IBM Plex Mono">${p.label}</text>`;
+  });
+
+  svg += `<text x="${pad.l}" y="14" font-size="9" fill="#444466" font-family="IBM Plex Mono">${title} — TIR% vs Duración</text>`;
+  svg += '</svg>';
+
+  document.getElementById(containerId).innerHTML = svg;
+}
+
+// ── DETAIL PANEL ──────────────────────────────────────────────────────────
+function openDetail(type, ticker) {
+  const item = type === 'on' ? ON_DATA.find(o => o.ticker === ticker) : BONOS_DATA.find(b => b.ticker === ticker);
+  if (!item) return;
+
+  const dv01 = (item.precio * item.dur * 0.0001).toFixed(4);
+  const days = Math.floor((new Date(item.vcto) - Date.now()) / 86400000);
+
+  let html = `
+    <div class="dp-ticker">${item.ticker}</div>
+    <div class="dp-name">${item.emisor || item.desc} ${item.sector ? '· ' + item.sector : ''}</div>
+    <div class="dp-section">DATOS DE MERCADO</div>
+    <div class="dp-grid">
+      <div class="dp-kv"><div class="dp-lbl">Precio</div><div class="dp-val">${item.precio.toFixed(2)}</div></div>
+      <div class="dp-kv"><div class="dp-lbl">TIR</div><div class="dp-val" style="color:var(--cy)">${item.tir.toFixed(2)}%</div></div>
+      <div class="dp-kv"><div class="dp-lbl">Cupón</div><div class="dp-val">${item.cupon?.toFixed(2) || '—'}%</div></div>
+      <div class="dp-kv"><div class="dp-lbl">Paridad</div><div class="dp-val">${item.paridad?.toFixed(1)}%</div></div>
+    </div>
+    <div class="dp-section">ESTRUCTURA</div>
+    <div class="dp-grid">
+      <div class="dp-kv"><div class="dp-lbl">Vencimiento</div><div class="dp-val" style="font-size:11px">${new Date(item.vcto).toLocaleDateString('es-AR',{day:'2-digit',month:'short',year:'numeric'})}</div></div>
+      <div class="dp-kv"><div class="dp-lbl">Días a venc.</div><div class="dp-val">${days}</div></div>
+      <div class="dp-kv"><div class="dp-lbl">Duración Mod.</div><div class="dp-val">${item.dur.toFixed(2)}a</div></div>
+      <div class="dp-kv"><div class="dp-lbl">DV01</div><div class="dp-val" style="font-size:11px">${dv01}</div></div>
+      <div class="dp-kv"><div class="dp-lbl">Ley</div><div class="dp-val">${item.ley === 'NY' ? '<span style="color:var(--gr)">NY</span>' : '<span style="color:var(--t2)">ARG</span>'}</div></div>
+      ${item.calif ? `<div class="dp-kv"><div class="dp-lbl">Calificación</div><div class="dp-val" style="color:var(--yl)">${item.calif}</div></div>` : ''}
+    </div>
+    ${item.spread ? `
+    <div class="dp-section">SPREAD</div>
+    <div class="dp-grid">
+      <div class="dp-kv"><div class="dp-lbl">vs Soberano</div><div class="dp-val">+${item.spread} bps</div></div>
+      <div class="dp-kv"><div class="dp-lbl">TIR sober. ref.</div><div class="dp-val" style="color:var(--t2)">${(item.tir - item.spread / 100).toFixed(2)}%</div></div>
+    </div>` : ''}
+    <div class="dp-section">ANÁLISIS</div>
+    <div style="background:var(--bgp);padding:12px;font-size:10px;color:var(--t2);line-height:1.8">
+      ${item.tir > 9 ? '⚠ TIR elevada — refleja mayor riesgo percibido. Verificar liquidez y solidez del emisor.' : ''}
+      ${item.tir >= 7 && item.tir <= 9 ? '✓ TIR en rango normal para emisores B. Relación riesgo/retorno razonable.' : ''}
+      ${item.tir < 7 ? '✓ TIR baja — emisor de alta calidad. Menor riesgo, menor retorno.' : ''}
+      <br>
+      ${item.ley === 'NY' ? '✓ Ley NY: mayor protección jurídica para el tenedor.' : '⚠ Ley ARG: menor protección ante eventuales reestructuraciones.'}
+      <br>
+      ${item.dur < 2 ? '✓ Duración corta — bajo riesgo de tasa. Ideal para conservadores.' : item.dur < 4 ? '◆ Duración media — balance entre riesgo y retorno.' : '⚠ Duración larga — sensible a cambios de tasas.'}
+    </div>
+    <div style="margin-top:12px;padding:8px;border:1px solid #332200;font-size:9px;color:var(--t3)">
+      ⚠ Datos de referencia estimada. Cotizaciones reales en tu broker habilitado por CNV.
+    </div>`;
+
+  document.getElementById('detail-content').innerHTML = html;
+  document.getElementById('detail-panel').classList.add('open');
+}
+
+function closeDetail() {
+  document.getElementById('detail-panel').classList.remove('open');
+}
+
+init();
+</script>
+</body>
+</html>
