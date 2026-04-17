@@ -984,7 +984,11 @@ function getNewsForStock(s){
 
 // ── REFRESH — consume APIs reales ────────────────────────────────────────────
 async function refresh(){
-  // 1. Precios reales de CEDEARs via Yahoo Finance
+  // 1. Obtener CCL real PRIMERO (necesario para convertir USD→ARS)
+  await updMBar();
+  const ccl = INDICES.ccl?.v || 1250;
+
+  // 2. Precios reales de CEDEARs via Yahoo Finance (en USD)
   const cedearSymbols=BASE.filter(b=>b.type==='cedear').map(b=>b.ticker).join(',');
   let realPrices={};
   try{
@@ -992,17 +996,18 @@ async function refresh(){
     if(r.ok){const d=await r.json();realPrices=d.quotes||{};}
   }catch(e){console.warn('[refresh] /api/prices falló:',e.message);}
 
-  // 2. Generar stocks — precio real para CEDEARs, simulado para locales
+  // 3. Generar stocks — precio real para CEDEARs, simulado para locales
   stocks=BASE.map(b=>{
     if(b.type==='cedear'&&realPrices[b.ticker]){
       const q=realPrices[b.ticker];
-      // Convertir precio USD a ARS usando CCL del market bar
-      const ccl=INDICES.ccl?.v||1250;
-      const ratio=parseInt((b.ratio||'1:1').split(':')[0])||1;
-      const priceARS=parseFloat((q.price*ccl/ratio).toFixed(2));
-      const prevARS =parseFloat(((q.prevClose||q.price)*ccl/ratio).toFixed(2));
+      // Ratio: "10:1" significa 1 CEDEAR = 1/10 acción → precio = USD * CCL / ratio
+      const ratioParts=(b.ratio||'1:1').split(':');
+      const ratioNum=parseInt(ratioParts[0])||1;
+      const ratioDen=parseInt(ratioParts[1])||1;
+      const ratioFactor=ratioNum/ratioDen; // 10:1 → factor=10, 2:1 → factor=2, 1:1 → factor=1
+      const priceARS=parseFloat((q.price*ccl/ratioFactor).toFixed(2));
+      const prevARS =parseFloat(((q.prevClose||q.price)*ccl/ratioFactor).toFixed(2));
       const pct=q.changePct||((priceARS-prevARS)/prevARS*100);
-      // Preservar basePrice para cálculos técnicos
       b.basePrice=priceARS;
       const sma20=priceARS*(1-(Math.random()*0.05-0.025));
       const sma50=priceARS*(1-(Math.random()*0.08-0.04));
@@ -1014,19 +1019,16 @@ async function refresh(){
       const atr=priceARS*(0.02+Math.random()*0.03);
       const strat=calcStrat(priceARS,pct,rsi_,sma20,sma50,h52,l52,atr,e9,e21);
       return{...b,price:priceARS,prevClose:prevARS,pct,sma20,sma50,ema9:e9,ema21:e21,
-        rsi:rsi_,h52,l52,atr,strat,_source:'yahoo'};
+        rsi:rsi_,h52,l52,atr,strat,_source:'yahoo',_priceUSD:q.price,_ccl:ccl};
     }
-    return genStock(b); // locales: simulado
+    return genStock(b); // locales: simulado (BYMA no tiene API pública gratuita)
   });
 
-  // 3. Market bar con datos reales
-  await updMBar();
-
+  // 3. Render
   renderTable();updStats();updTape();updScreener();
   document.getElementById('lupd').textContent='ÚLTIMA ACT: '+new Date().toLocaleTimeString('es-AR');
   countdown=30;
   document.getElementById('load').classList.remove('show');
-  // Re-render heatmap si está activo
   if(document.getElementById('heatmap-panel').style.display==='block') renderHeatmap();
   if(document.getElementById('mov').classList.contains('open')&&cStock){
     const s=stocks.find(x=>x.ticker===cStock.ticker);
